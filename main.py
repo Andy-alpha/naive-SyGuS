@@ -40,12 +40,24 @@ if __name__ == '__main__':
     #print (checker.check('(define-fun f ((x Int)) Int (mod (* x 3) 10)  )'))
     #raw_input()
     SynFunExpr = []
+    # My new add
+    Constraints = []
+    isLia = 1
     StartSym = 'My-Start-Symbol' #virtual starting symbol
     for expr in bmExpr:
         if len(expr)==0:
             continue
         elif expr[0]=='synth-fun':
             SynFunExpr=expr
+        elif expr[0]=='constraint':
+            Constraints.append(expr)
+        elif expr[0]=='declare-var':
+            if expr[2]=='Int':
+                #examples.all_consts[expr[1]]=0
+                pass
+        elif expr[0]=='set-logic':
+            if expr[1]=='BV':
+                isLia = 0
     FuncDefine = ['define-fun']+SynFunExpr[1:4] #copy function signature
     FuncDefineStr = translator.toString(FuncDefine,ForceBracket = True) # use Force Bracket = True on function definition. MAGIC CODE. DO NOT MODIFY THE ARGUMENT ForceBracket = True.
     #print(FuncDefine)
@@ -64,6 +76,18 @@ if __name__ == '__main__':
                 Productions[NTName].append(str(NT[1]))
             else:
                 Productions[NTName].append(NT)
+    # My new add
+    if isLia == 0:
+        #temp = BVSolver.work(Constraints)
+        #Ans = f"(define-fun f ((x (_ BitVec 64))) (_ BitVec 64) (bvor #x0000000000000001 x))"
+        import BVsolver
+        CurrStr = translator.toString(BVsolver.work(Constraints))
+        Ans = FuncDefineStr[:-1]+' '+ CurrStr+FuncDefineStr[-1] # insert Program just before the last bracket ')'
+        print(Ans)
+        with open('result.txt', 'w') as f:
+            f.write(Ans)
+        exit()
+
     Count = 0
     TE_set = set()
     while(BfsQueue!= []):
