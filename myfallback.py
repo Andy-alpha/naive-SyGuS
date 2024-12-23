@@ -2,7 +2,7 @@ import sys
 import sexp
 import pprint
 import translator
-import myfallback
+import bv, lib, fallback
 
 def Extend(Stmts,Productions):
     ret = []
@@ -28,11 +28,7 @@ def stripComments(bmFile):
         noComments += line
     return noComments + '\n)'
 
-if __name__ == '__main__':
-    benchmarkFile = open(sys.argv[1])
-    bm = stripComments(benchmarkFile)
-    bmExpr = sexp.sexp.parseString(bm, parseAll=True).asList()[0] #Parse string to python list
-    '''
+def solve(bmExpr):
     checker=translator.ReadQuery(bmExpr)
     SynFunExpr = []
     StartSym = 'My-Start-Symbol' #virtual starting symbol
@@ -72,36 +68,8 @@ if __name__ == '__main__':
             if not TE_str in TE_set:
                 BfsQueue.append(TE)
                 TE_set.add(TE_str)
-    '''
-    Type = None
-    for expr in bmExpr:
-        if type(expr) is list:
-            if expr[0] == 'set-logic':
-                Type = expr[1]
-                break
-    ans = None
-    if Type == 'BV' or Type == 'LIA':
-        try:
-            if Type == 'BV':
-                import bv
-                ans = bv.solve(bmExpr)
-                
-            else:
-                import lib
-                ans = lib.genAnswer(bmExpr)
-        except Exception:
-            ans = myfallback.solve(bmExpr)
-        finally:
-            with open('result.txt', 'w') as f:
-                f.write(ans)
-            exit(0)
-    else:
-        ans = myfallback.solve(bmExpr)
-        with open('result.txt', 'w') as f:
-            f.write(ans)
-
-    '''
     print(Ans)
-    with open('result.txt', 'w') as f:
-        f.write(Ans)
-    '''
+    # with open('result.txt', 'w') as f:
+    #     f.write(Ans)
+    return Ans
+   
